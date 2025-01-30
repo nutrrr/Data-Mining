@@ -119,6 +119,8 @@ function tournamentSelection(population, tournamentSize, numSelected) {
         for (let j = 0; j < tournamentSize; j++) {
             const randomIndex = Math.floor(Math.random() * population.length);
             tournamentParticipants.push(population[randomIndex]);
+            population.splice(randomIndex, 1);
+
         }
 
         // คำนวณ fitness และเลือกโครโมโซมที่มี fitness สูงสุด
@@ -206,7 +208,7 @@ function geneticAlgorithm(userItemTyep, targetFitness, mutationRate, listItem, n
     // ---------------------------------------Initial Population--------------------------------------------
     const startTime = performance.now() // ใช้จับเวลาเริ่มทำงาน
     let log = [];
-    log.push({
+    let init = {
         phase: 'initialization',
         parameters: {
             targetFitness,
@@ -216,7 +218,7 @@ function geneticAlgorithm(userItemTyep, targetFitness, mutationRate, listItem, n
             maxGeneration,
             userItemTypes: userItemTyep
         }
-    });
+    };
 
     let generation = 0;
 
@@ -227,14 +229,12 @@ function geneticAlgorithm(userItemTyep, targetFitness, mutationRate, listItem, n
     //  console.log(Population);
 
 
-    log.push({
-        generation: 0,
-        phase: 'initial_population',
+    firstGeneration = {
         population: Population.map(chromosome => ({
             chromosome,
             fitness: fitnessFunction(chromosome)
         }))
-    });
+    };
 
     do{
         generation += 1;
@@ -338,7 +338,7 @@ function geneticAlgorithm(userItemTyep, targetFitness, mutationRate, listItem, n
         
     const endTime = performance.now(); // ใช้จับเวลาจบทำงาน
     const executionTime = endTime - startTime; // เวลาในการทำงานทั้งหมด
-    const result = {chromosome: rankedPopulation[0].chromosome, fitness: rankedPopulation[0].fitness, time: executionTime, log: log}
+    const result = {chromosome: rankedPopulation[0].chromosome, fitness: rankedPopulation[0].fitness, time: executionTime, initialInfo: init, firstGeneration: firstGeneration, log: log}
     return result;
 
 }
@@ -355,7 +355,7 @@ function run(){
     const maxGeneration = 100;
 
     output = geneticAlgorithm(userItemTyep, targetFitness, mutationRate, listItem, numPopulation, selectedState, maxGeneration);
-
+    console.log(output);
 }
 
 
