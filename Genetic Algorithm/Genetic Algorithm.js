@@ -31,7 +31,7 @@ function fitnessFunction(gene) {
 
 function rouletteWheelSelection(population, numSelected) {
     // Calculate total fitness
-    let chromosomes = population.slice();
+    let chromosomes = population;
     let fitnessScores = [];
     for (let i = 0; i < chromosomes.length; i++){
         let fitness = fitnessFunction(chromosomes[i]);
@@ -205,85 +205,157 @@ const itemEnum = Object.freeze({
 function geneticAlgorithm(userItemTyep, targetFitness, mutationRate, listItem, numPopulation, selectedState, maxGeneration){
     // ---------------------------------------Initial Population--------------------------------------------
     const startTime = performance.now() // ใช้จับเวลาเริ่มทำงาน
+    let log = [];
+    log.push({
+        phase: 'initialization',
+        parameters: {
+            targetFitness,
+            mutationRate,
+            numPopulation,
+            selectedState,
+            maxGeneration,
+            userItemTypes: userItemTyep
+        }
+    });
 
     let generation = 0;
 
 
     let Population = initialPopulation(userItemTyep, numPopulation, listItem);
     let rankedPopulation;
-    // console.log("---------------------------------------Initial Population--------------------------------------------");
-    // console.log(Population);
+    //  console.log("---------------------------------------Initial Population--------------------------------------------");
+    //  console.log(Population);
 
+
+    log.push({
+        generation: 0,
+        phase: 'initial_population',
+        population: Population.map(chromosome => ({
+            chromosome,
+            fitness: fitnessFunction(chromosome)
+        }))
+    });
 
     do{
         generation += 1;
-        // ---------------------------------------Selection scheme--------------------------------------
-        var selectedChromosomes;
-        switch (selectedState){
-            case  selectionState.RouletteWheel:
-                selectedChromosomes = rouletteWheelSelection(Population, 4); // เลือก 4 โครโมโซม จากการสุ่ม
-                break;
-            case  selectionState.Tournament:
-                const tournamentSize = 3;  // ขนาดของ Tournament
-                selectedChromosomes = tournamentSelection(Population, tournamentSize, 4);  // เลือก 4 โครโมโซม จากการสุ่ม
-                break;
-            case  selectionState.LinearRanking:
-                selectedChromosomes = linearRankingSelection(Population, 4)
-                break;
+        var tmpPopulation = [];
+        let generationLog = {
+            generation,
+            selections: [],
+            crossovers: [],
+            mutations: [],
+            finalPopulation: null
+        };
+
+        
+        do{
+            // ---------------------------------------Selection scheme--------------------------------------
+            var selectedChromosomes;
+            switch (selectedState){
+                case  selectionState.RouletteWheel:
+                    selectedChromosomes = rouletteWheelSelection(Population, 2); // เลือก 2 โครโมโซม จากการสุ่ม
+                    break;
+                case  selectionState.Tournament:
+                    const tournamentSize = 3;  // ขนาดของ Tournament
+                    selectedChromosomes = tournamentSelection(Population, tournamentSize, 2);  // เลือก 2 โครโมโซม จากการสุ่ม
+                    break;
+                case  selectionState.LinearRanking:
+                    selectedChromosomes = linearRankingSelection(Population, 2)
+                    break;
+                
+            }
+
+            generationLog.selections.push({
+                
+                selectedChromosomes: selectedChromosomes.map(chromosome => ({
+                    chromosome,
+                    fitness: fitnessFunction(chromosome)
+                })),
+            });
             
-        }
-        // console.log("---------------------------------------Selection scheme--------------------------------------")
-        // console.log(selectedChromosomes);
+            
+            // ------------------------------------Crossover operator---------------------------------------
+            const selectedParents = selectedChromosomes.slice(0, 2); // เลือก 2 โครโมโซมเป็นพ่อแม่
+            const [offspring1, offspring2] = crossover(selectedParents[0], selectedParents[1]);
+            
+            generationLog.crossovers.push({
+                parents: selectedParents.map(chromosome => ({
+                    chromosome,
+                    fitness: fitnessFunction(chromosome)
+                })),
+                offspring: [
+                    { chromosome: offspring1, fitness: fitnessFunction(offspring1) },
+                    { chromosome: offspring2, fitness: fitnessFunction(offspring2) }
+                ]
+            });
 
 
-        // ------------------------------------Crossover operator---------------------------------------
-        const selectedParents = selectedChromosomes.slice(0, 2); // เลือก 2 โครโมโซมเป็นพ่อแม่
-        const [offspring1, offspring2] = crossover(selectedParents[0], selectedParents[1]);
-        // console.log(" ------------------------------------Crossover operator---------------------------------------")
-        // console.log(offspring1, offspring2);
+            // -------------------------------------Mtation operator----------------------------------------
+            const mutatedOffspring1 = mutateChromosome(offspring1, mutationRate, listItem);
+            const mutatedOffspring2 = mutateChromosome(offspring2, mutationRate, listItem);
+
+            tmpPopulation.push(mutatedOffspring1);
+            tmpPopulation.push(mutatedOffspring2);
+
+            generationLog.mutations.push({
+                beforeMutation: [
+                    { chromosome: offspring1, fitness: fitnessFunction(offspring1) },
+                    { chromosome: offspring2, fitness: fitnessFunction(offspring2) }
+                ],
+                afterMutation: [
+                    { chromosome: mutatedOffspring1, fitness: fitnessFunction(mutatedOffspring1) },
+                    { chromosome: mutatedOffspring2, fitness: fitnessFunction(mutatedOffspring2) }
+                ],
+                mutationRate
+            });
+        }while(Population.length > 0)
 
 
-        // -------------------------------------Mtation operator----------------------------------------
-        const mutatedOffspring1 = mutateChromosome(offspring1, mutationRate, listItem);
-        const mutatedOffspring2 = mutateChromosome(offspring2, mutationRate, listItem);
-        // console.log("-------------------------------------Mtation operator----------------------------------------")
-        // console.log(mutatedOffspring1, mutatedOffspring2);
-
-
-        rankedPopulation = chromosomeFitnessRanking(Population);
+        rankedPopulation = chromosomeFitnessRanking(tmpPopulation);
         numChrKeep = 2; // จำนวนที่เก็บ chromosome ไว้ในรอบถัดไป
         newPopulation = [];
         for(let i = 0; i < numChrKeep; i++){
             newPopulation.push(rankedPopulation[i].chromosome)
         }
-
-        Population = newPopulation.concat(initialPopulation(userItemTyep, numPopulation - numChrKeep, listItem))
         
+        Population = newPopulation.concat(initialPopulation(userItemTyep, numPopulation - numChrKeep, listItem))
 
+        
+        generationLog.finalPopulation = {
+            rankedPopulation: rankedPopulation.map(item => ({
+                chromosome: item.chromosome,
+                fitness: item.fitness,
+                rank: item.rank
+            })),
+            newPopulation: Population.map(chromosome => ({
+                chromosome,
+                fitness: fitnessFunction(chromosome)
+            }))
+        };
+        log.push(generationLog);
     } while (rankedPopulation[0].fitness > targetFitness && generation <= maxGeneration)
 
-
+        
     const endTime = performance.now(); // ใช้จับเวลาจบทำงาน
     const executionTime = endTime - startTime; // เวลาในการทำงานทั้งหมด
-    // console.log("executionTime is ", executionTime, "ms");
-
-    const result = {chromosome: rankedPopulation[0].chromosome, fitness: rankedPopulation[0].fitness, time: executionTime}
+    const result = {chromosome: rankedPopulation[0].chromosome, fitness: rankedPopulation[0].fitness, time: executionTime, log: log}
     return result;
 
 }
 
 function run(){
     var listItem = LoadItem('data.json') // data item in store
-    const userItemTyep = [itemEnum.Drinks, itemEnum.Drinks, itemEnum.Snacks, itemEnum.Food];
-    const targetFitness = 85; // กำหนด fitness ที่จ้องการ
+    const userItemTyep = [itemEnum.Drinks, itemEnum.Snacks, itemEnum.Food];
+    const targetFitness = 65; // กำหนด fitness ที่จ้องการ
     
-    const numPopulation = 10; // จำนวน Population ที่จะถูกสร้างขึ้นในแต่ละ Generation
-    const selectedState = selectionState.Tournament; // set selectionState for algorithm
+    const numPopulation = 4; // จำนวน Population ที่จะถูกสร้างขึ้นในแต่ละ Generation
+    const selectedState = selectionState.RouletteWheel; // set selectionState for algorithm
     const mutationRate = 0.5;  // กำหนด mutation rate เป็น 0.5 (หมายความว่ามีโอกาส 50% ที่จะมีการเปลี่ยนแปลง)
 
     const maxGeneration = 100;
 
-    console.log(geneticAlgorithm(userItemTyep, targetFitness, mutationRate, listItem, numPopulation, selectedState, maxGeneration));
+    output = geneticAlgorithm(userItemTyep, targetFitness, mutationRate, listItem, numPopulation, selectedState, maxGeneration);
+
 }
 
 
