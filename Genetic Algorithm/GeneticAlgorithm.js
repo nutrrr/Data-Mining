@@ -1,5 +1,5 @@
 //Use to find the key use values ​for listItem
-function getByValue(map, searchValue) {
+export function getByValue(map, searchValue) {
     for (let [key, value] of map.entries()) {
         if (value.includes(searchValue)){
             return key;
@@ -8,7 +8,15 @@ function getByValue(map, searchValue) {
 }
 
 
-function getMinFiteness(population){
+export function removeArrayByValue(array, value){
+    var index = array.indexOf(value);
+    if (index !== -1) {
+    array.splice(index, 1);
+    }
+
+}
+
+export function getMinFiteness(population){
     let minFiteness = fitnessFunction(population[0]);
     for (let i = 1; i < population.length; i++){
         fit = fitnessFunction(population[i]);
@@ -21,7 +29,7 @@ function getMinFiteness(population){
 }
 
 // Calculate fitness
-function fitnessFunction(gene) {
+export function fitnessFunction(gene) {
     let fit = 0;
     for (let i = 0; i < gene.length; i++) {
         fit += gene[i].price;
@@ -29,7 +37,7 @@ function fitnessFunction(gene) {
     return fit;
 }
 
-function rouletteWheelSelection(population, numSelected) {
+export function rouletteWheelSelection(population, numSelected) {
     // Calculate total fitness
     let chromosomes = population;
     let fitnessScores = [];
@@ -62,20 +70,20 @@ function rouletteWheelSelection(population, numSelected) {
 
 }
 
-function linearRankingSelection(population, numSelected){
-    const rankedPopulation = chromosomeFitnessRanking(population); // จัดอันดับโครโมโซมจากค่าฟิตเนส
-    const n = rankedPopulation.length;
-    let selectionProbabilities = [];
-
-    // คำนวณค่า probability ตาม linear ranking
-    for (let i = 0; i < n; i++) {
-        let rank = rankedPopulation[i].rank;
-        let probability = (2 * (n - rank + 1)) / (n * (n + 1)); 
-        selectionProbabilities.push(probability);
-    }
-
+export function linearRankingSelection(population, numSelected){
     const selectedChromosomes = [];
+
     for (let i = 0; i < numSelected; i++) {
+        const rankedPopulation = chromosomeFitnessRanking(population); // จัดอันดับโครโมโซมจากค่าฟิตเนส
+        const n = rankedPopulation.length;
+        let selectionProbabilities = [];
+        // คำนวณค่า probability ตาม linear ranking
+        for (let i = 0; i < n; i++) {
+            let rank = rankedPopulation[i].rank;
+            let probability = (2 * (n - rank + 1)) / (n * (n + 1)); 
+            selectionProbabilities.push(probability);
+        }
+
         let randomNum = Math.random();
         let cumulativeProbability = 0;
 
@@ -83,17 +91,17 @@ function linearRankingSelection(population, numSelected){
             cumulativeProbability += selectionProbabilities[j];
             if (randomNum < cumulativeProbability) {
                 selectedChromosomes.push(rankedPopulation[j].chromosome);
+                removeArrayByValue(population, rankedPopulation[j].chromosome);
                 break;
             }
         }
     }
-
     return selectedChromosomes;
 }
 
 
 // ฟังก์ชันจัดอันดับโครโมโซมตามค่าความเหมาะสม
-function chromosomeFitnessRanking(population) {
+export function chromosomeFitnessRanking(population) {
     const fitnessScores = population.map((chromosome) => ({
         chromosome,
         fitness: fitnessFunction(chromosome),
@@ -110,17 +118,14 @@ function chromosomeFitnessRanking(population) {
 }
 
 // ฟังก์ชัน Tournament Selection
-function tournamentSelection(population, tournamentSize, numSelected) {
+export function tournamentSelection(population, tournamentSize, numSelected) {
     const selectedChromosomes = [];
-
     for (let i = 0; i < numSelected; i++) {
         // สุ่มเลือกโครโมโซมตามจำนวน tournamentSize
         const tournamentParticipants = [];
         for (let j = 0; j < tournamentSize; j++) {
             const randomIndex = Math.floor(Math.random() * population.length);
             tournamentParticipants.push(population[randomIndex]);
-            population.splice(randomIndex, 1);
-
         }
 
         // คำนวณ fitness และเลือกโครโมโซมที่มี fitness สูงสุด
@@ -131,13 +136,13 @@ function tournamentSelection(population, tournamentSize, numSelected) {
         });
 
         selectedChromosomes.push(bestChromosome);
+        removeArrayByValue(population, bestChromosome);
     }
-
     return selectedChromosomes;
 }
 
 // ฟังก์ชัน Crossover ที่สร้าง offspring จากพ่อแม่ 2 ตัว
-function crossover(parent1, parent2) {
+export function crossover(parent1, parent2) {
     const crossoverPoint = Math.floor(parent1.length / 2);  // จุดที่ทำการ crossover (ครึ่งหนึ่งของโครโมโซม)
     const offspring1 = [...parent1.slice(0, crossoverPoint), ...parent2.slice(crossoverPoint)];
     const offspring2 = [...parent2.slice(0, crossoverPoint), ...parent1.slice(crossoverPoint)];
@@ -145,12 +150,12 @@ function crossover(parent1, parent2) {
 }
 
 // ฟังก์ชัน Mutation ที่สุ่มเปลี่ยนค่าเป็นตัวเลขที่ไม่ใช่ 0 หรือ 1
-function mutateChromosome(chromosome, mutationRate, listItem) {
+export function mutateChromosome(chromosome, mutationRate, listItem) {
     return chromosome.map((gene) => {
         if (Math.random() < mutationRate) {
             let newGene;
             do {
-                newListItem = listItem.get(getByValue(listItem, gene));
+                let newListItem = listItem.get(getByValue(listItem, gene));
                 newGene = newListItem[Math.floor(Math.random() * newListItem.length)]; // สุ่มเลขจาก 2 ถึง 10
             } while (newGene === gene); // ถ้าค่าที่สุ่มออกมาเหมือนเดิม ให้สุ่มใหม่
             return newGene;
@@ -161,7 +166,7 @@ function mutateChromosome(chromosome, mutationRate, listItem) {
 
 
 // Generate initial population
-function initialPopulation(gene, pop, listItem) {
+export function initialPopulation(gene, pop, listItem) {
     var chromosomes = [];
     for (var i = 0; i < pop; i++) {
         var chromosome = [];
@@ -174,8 +179,8 @@ function initialPopulation(gene, pop, listItem) {
     return chromosomes;
 }
 
-function LoadItem(path){
-    var json = require('./' + path);
+export function LoadItem(){
+    var json = itemData;
     var listItem = new Map()
     for(var i=0; i < json.length; i++){
         var itemType = json[i].type;
@@ -190,13 +195,13 @@ function LoadItem(path){
     return listItem;
 }
 
-const selectionState = Object.freeze({
+export const selectionState = Object.freeze({
     RouletteWheel: 0,
     Tournament: 1,
     LinearRanking: 2
 });
 
-const itemEnum = Object.freeze({
+export const itemEnum = Object.freeze({
     Drinks: "เครื่องดื่ม",
     Snacks: "ขนมขบเคี้ยว",
     Vegetables: "ผัก-ผลไม้",
@@ -204,7 +209,7 @@ const itemEnum = Object.freeze({
     Supplies: "ของใช้"
 })
 
-function geneticAlgorithm(userItemTyep, targetFitness, mutationRate, listItem, numPopulation, selectedState, maxGeneration){
+export function geneticAlgorithm(userItemTyep, targetFitness, mutationRate, listItem, numPopulation, selectedState, maxGeneration){
     // ---------------------------------------Initial Population--------------------------------------------
     const startTime = performance.now() // ใช้จับเวลาเริ่มทำงาน
     let log = [];
@@ -222,19 +227,16 @@ function geneticAlgorithm(userItemTyep, targetFitness, mutationRate, listItem, n
 
     let generation = 0;
 
-
     let Population = initialPopulation(userItemTyep, numPopulation, listItem);
     let rankedPopulation;
-    //  console.log("---------------------------------------Initial Population--------------------------------------------");
-    //  console.log(Population);
 
-
-    firstGeneration = {
+    let firstGeneration = {
         population: Population.map(chromosome => ({
             chromosome,
             fitness: fitnessFunction(chromosome)
         }))
     };
+
 
     do{
         generation += 1;
@@ -312,8 +314,8 @@ function geneticAlgorithm(userItemTyep, targetFitness, mutationRate, listItem, n
 
 
         rankedPopulation = chromosomeFitnessRanking(tmpPopulation);
-        numChrKeep = 2; // จำนวนที่เก็บ chromosome ไว้ในรอบถัดไป
-        newPopulation = [];
+        let numChrKeep = 2; // จำนวนที่เก็บ chromosome ไว้ในรอบถัดไป
+        let newPopulation = [];
         for(let i = 0; i < numChrKeep; i++){
             newPopulation.push(rankedPopulation[i].chromosome)
         }
@@ -343,23 +345,82 @@ function geneticAlgorithm(userItemTyep, targetFitness, mutationRate, listItem, n
 
 }
 
-function run(){
-    var listItem = LoadItem('data.json') // data item in store
-    const userItemTyep = [itemEnum.Drinks, itemEnum.Snacks, itemEnum.Food];
-    const targetFitness = 65; // กำหนด fitness ที่จ้องการ
-    
-    const numPopulation = 4; // จำนวน Population ที่จะถูกสร้างขึ้นในแต่ละ Generation
-    const selectedState = selectionState.RouletteWheel; // set selectionState for algorithm
-    const mutationRate = 0.5;  // กำหนด mutation rate เป็น 0.5 (หมายความว่ามีโอกาส 50% ที่จะมีการเปลี่ยนแปลง)
-
-    const maxGeneration = 100;
-
-    output = geneticAlgorithm(userItemTyep, targetFitness, mutationRate, listItem, numPopulation, selectedState, maxGeneration);
-    console.log(output);
-}
 
 
-run();
-
-
-
+const itemData = [
+    {
+      "type": "เครื่องดื่ม",
+      "name": "โค้ก",
+      "price": 15
+    },
+    {
+      "type": "เครื่องดื่ม",
+      "name": "น้ำส้ม",
+      "price": 20
+    },
+    {
+      "type": "เครื่องดื่ม",
+      "name": "ชาเขียว",
+      "price": 18
+    },
+    {
+      "type": "ขนมขบเคี้ยว",
+      "name": "มันฝรั่งทอด",
+      "price": 20
+    },
+    {
+      "type": "ขนมขบเคี้ยว",
+      "name": "บิสกิต",
+      "price": 30
+    },
+    {
+      "type": "ขนมขบเคี้ยว",
+      "name": "ถั่วลิสง",
+      "price": 25
+    },
+    {
+      "type": "ผัก-ผลไม้",
+      "name": "แอปเปิล",
+      "price": 12
+    },
+    {
+      "type": "ผัก-ผลไม้",
+      "name": "กล้วย",
+      "price": 10
+    },
+    {
+      "type": "ผัก-ผลไม้",
+      "name": "มะเขือเทศ",
+      "price": 25
+    },
+    {
+      "type": "อาหาร",
+      "name": "ข้าวสวย",
+      "price": 30
+    },
+    {
+      "type": "อาหาร",
+      "name": "ไข่ไก่",
+      "price": 35
+    },
+    {
+      "type": "อาหาร",
+      "name": "ไก่ทอด",
+      "price": 50
+    },
+    {
+      "type": "ของใช้",
+      "name": "ผงซักฟอก",
+      "price": 50
+    },
+    {
+      "type": "ของใช้",
+      "name": "สบู่",
+      "price": 20
+    },
+    {
+      "type": "ของใช้",
+      "name": "น้ำยาล้างจาน",
+      "price": 35
+    }
+  ]
