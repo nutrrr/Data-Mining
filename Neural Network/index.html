@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Network Visualization</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <svg id="lines"></svg>
+        <div class="column" id="column1">
+            <div class="layer-label">Input Layer</div>
+        </div>
+        <div class="column" id="column2">
+            <div class="layer-label">Hidden Layer</div>
+        </div>
+        <div class="column" id="column3">
+            <div class="layer-label">Output Layer</div>
+        </div>
+    </div>
+    <div class="buttons">
+        <div>
+            <button class="btn" onclick="addCircle(1)">Add Input Node</button>
+            <button class="btn remove" onclick="removeCircle(1)">Remove Input Node</button>
+        </div>
+        <div>
+            <button class="btn" onclick="addCircle(2)">Add Hidden Node</button>
+            <button class="btn remove" onclick="removeCircle(2)">Remove Hidden Node</button>
+        </div>
+        <div>
+            <button class="btn" onclick="addCircle(3)">Add Output Node</button>
+            <button class="btn remove" onclick="removeCircle(3)">Remove Output Node</button>
+        </div>
+    </div>
+    <div class="buttons">
+        <button class="btn run" onclick="runNN()">Run</button>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
