@@ -5,18 +5,28 @@ import {
     itemEnum 
 } from './GeneticAlgorithm.js'; 
 
-function run(){
-    var listItem = LoadItem() // data item in store
-    const userItemTyep = [itemEnum.Drinks, itemEnum.Snacks, itemEnum.Food];
-    const targetFitness = 65; // กำหนด fitness ที่จ้องการ
-    
-    const numPopulation = 4; // จำนวน Population ที่จะถูกสร้างขึ้นในแต่ละ Generation
-    const selectedState = selectionState.Tournament; // set selectionState for algorithm
-    const mutationRate = 0.5;  // กำหนด mutation rate เป็น 0.5 (หมายความว่ามีโอกาส 50% ที่จะมีการเปลี่ยนแปลง)
+// กำหนดค่าพารามิเตอร์ทั้งหมด
+var listItem = LoadItem(); // โหลดข้อมูลจากฟังก์ชัน LoadItem
+const userItemTyep = [itemEnum.Drinks, itemEnum.Snacks, itemEnum.Food]; // ประเภทของรายการที่ต้องการ
+const targetFitness = 65;  // ค่า fitness ที่ต้องการ
+const numPopulation = 4;   // จำนวน Population ในแต่ละ Generation
+const selectedState = selectionState.Tournament; // การเลือกแบบ Tournament
+const mutationRate = 0.5;  // ค่า Mutation Rate
+const maxGeneration = 100; // จำนวน Generation ที่จะรัน
 
-    const maxGeneration = 100;
+// เรียกใช้ geneticAlgorithm พร้อมพารามิเตอร์ที่กำหนดไว้
+let output = geneticAlgorithm(userItemTyep, targetFitness, mutationRate, listItem, numPopulation, selectedState, maxGeneration);
 
-    let output = geneticAlgorithm(userItemTyep, targetFitness, mutationRate, listItem, numPopulation, selectedState, maxGeneration);
-    console.log(output)
-}
-run();
+// แสดงผลลัพธ์ใน Console
+console.log("ผลลัพธ์จาก Genetic Algorithm:");
+console.log("Time Taken:", output.time); // เวลาที่ใช้ในการทำงาน
+console.log("Initial Info:", output.initialInfo); // ข้อมูลเริ่มต้น
+console.log("First Generation:", output.firstGeneration); // กลุ่มข้อมูลแรก
+console.log("Log of each Generation:", output.log); // การทำงานในแต่ละ generation
+
+// แสดงผลลัพธ์บนหน้าเว็บ
+document.body.innerHTML += `<h2>ผลลัพธ์จาก Genetic Algorithm:</h2>`;
+document.body.innerHTML += `<p><strong>Time Taken:</strong> ${output.time} ms</p>`;
+document.body.innerHTML += `<p><strong>Initial Info:</strong> <pre>${JSON.stringify(output.initialInfo, null, 2)}</pre></p>`;
+document.body.innerHTML += `<p><strong>First Generation:</strong> <pre>${JSON.stringify(output.firstGeneration, null, 2)}</pre></p>`;
+document.body.innerHTML += `<p><strong>Log of each Generation:</strong> <pre>${JSON.stringify(output.log, null, 2)}</pre></p>`;
