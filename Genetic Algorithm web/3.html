@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>หน้าแรก</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-image: url('4.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        header {
+            background-color: rgba(0, 0, 0, 0.85);
+            color: #fff;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 3px solid #FFD700;
+        }
+        .logo {
+            height: 40px;
+        }
+        nav {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+        nav ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+        nav ul li {
+            margin: 0 15px;
+        }
+        nav ul li a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+        nav ul li a:hover {
+            color: #FFD700;
+        }
+        .container {
+            max-width: 500px;
+            margin: 20px auto;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), 0 6px 20px rgba(0, 0, 0, 0.19);
+            text-align: center;
+        }
+        .slideshow-container {
+            position: relative;
+            max-width: 75%;
+            margin: auto;
+        }
+        .mySlides {
+            display: none;
+            opacity: 0;
+            transition: opacity 1s ease-in-out; /* เพิ่ม transition สำหรับ opacity */
+        }
+        
+        
+        .mySlides img {
+            width: 100%;
+            max-width: 500px; /* กำหนดความกว้างสูงสุดของรูปภาพ */
+            aspect-ratio: 16 / 9; /* กำหนดอัตราส่วนภาพเป็น 16:9 */
+            object-fit: cover; /* ปรับการแสดงผลของรูปภาพให้ครอบคลุมพื้นที่ */
+            border-radius: 10px;
+        }
+        
+        .prev, .next {
+            cursor: pointer;
+            position: absolute;
+            top: 50%;
+            width: auto;
+            margin-top: -22px;
+            padding: 16px;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            transition: 0.6s ease;
+            border-radius: 0 3px 3px 0;
+            user-select: none;
+        }
+        .next {
+            right: 0;
+            border-radius: 3px 0 0 3px;
+        }
+        .prev:hover, .next:hover {
+            background-color: rgba(0,0,0,0.8);
+        }
+        .dot {
+            cursor: pointer;
+            height: 15px;
+            width: 15px;
+            margin: 0 2px;
+            background-color: #bbb;
+            border-radius: 50%;
+            display: inline-block;
+            transition: background-color 0.6s ease;
+        }
+        .active, .dot:hover {
+            background-color: #717171;
+        }
+        footer {
+            background-color: rgba(0, 0, 0, 0.85);
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+            border-top: 3px solid #FFD700;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="3.html"> <!-- เพิ่มลิงก์ไปยังหน้าแรก -->
+            <img src="pic.jpg" alt="โลโก้" class="logo">
+        </a>
+        <nav>
+            <ul>
+                <li><a href="3.html">หน้าแรก</a></li>
+                <li><a href="2.1.html">จับคู่อาหาร</a></li>
+                <li><a href="4.html">ประวัติการแสดง</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <h1>ยินดีต้อนรับสู่หน้าแรก</h1>
+        <p>เราไม่สามารถบอกได้ว่าอาหารเซ็ตไหนดีที่สุด แต่เราบอกได้ว่าเซ็ตไหนคุ้มค่าสุดสำหรับคุณ</p>
+        <div class="slideshow-container">
+            <div class="mySlides">
+                <img src="9.jpg" alt="ภาพที่ 1">
+            </div>
+            <div class="mySlides">
+                <img src="8.jpg" alt="ภาพที่ 2">
+            </div>
+            <div class="mySlides">
+                <img src="7.png" alt="ภาพที่ 3">
+            </div>
+        </div>
+        <br>
+        <div style="text-align:center">
+            <span class="dot" onclick="currentSlide(1)"></span>
+            <span class="dot" onclick="currentSlide(2)"></span>
+            <span class="dot" onclick="currentSlide(3)"></span>
+        </div>
+        <div style="text-align: center; margin-top: 20px;">
+            <button onclick="window.location.href='2.1.html'" 
+                style="background-color: #FF4500; /* สีส้มแดง */
+                color: white; 
+                border: none; 
+                padding: 12px 25px; 
+                font-size: 18px; 
+                border-radius: 8px; 
+                cursor: pointer; 
+                font-weight: bold; 
+                transition: all 0.3s ease; 
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);">
+
+                🥗 ไปจับคู่อาหาร 🍜
+            </button>
+        </div>
+        <style>
+            button:hover {
+                background-color: #FF6347; /* สีแดงอมส้มเมื่อชี้ */
+                transform: scale(1.05); /* ขยายเล็กน้อย */
+                box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
+            }
+
+            button:active {
+                background-color: #CD3700; /* สีเข้มขึ้นเมื่อกด */
+                transform: scale(0.95); /* ย่อเล็กลง */
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            }
+        </style>
+    </div>
+    <footer>
+        <p>&copy; 2025 โปรแกรมของคุณ</p>
+    </footer>
+    <script>
+        let slideIndex = 0;
+        showSlides();
+        
+        function showSlides() {
+            let slides = document.getElementsByClassName("mySlides");
+            let dots = document.getElementsByClassName("dot");
+            
+            // ซ่อนสไลด์ทั้งหมดก่อน
+            for (let i = 0; i < slides.length; i++) {
+                slides[i].style.display = "none";
+                slides[i].style.opacity = 0; // ซ่อนภาพ
+            }
+            
+            slideIndex++;
+            if (slideIndex > slides.length) { slideIndex = 1; } // รีเซ็ตสไลด์เมื่อถึงท้าย
+            
+            // แสดงสไลด์ปัจจุบันพร้อมทำให้มันค่อยๆ ชัด
+            slides[slideIndex - 1].style.display = "block";
+            setTimeout(() => {
+                slides[slideIndex - 1].style.opacity = 1; // ทำให้ภาพปัจจุบันชัด
+            }, 50); // หน่วงเล็กน้อยเพื่อให้การเปลี่ยนแปลงเริ่มทำงาน
+        
+            // อัปเดตจุดที่กำลังแสดง
+            for (let i = 0; i < dots.length; i++) {
+                dots[i].className = dots[i].className.replace(" active", "");
+            }
+            dots[slideIndex - 1].className += " active";
+        
+            // เปลี่ยนสไลด์ทุก 5 วินาที
+            setTimeout(showSlides, 5000);
+        }
+        
+    </script>
+</body>
+</html>

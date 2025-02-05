@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>หน้าสร้างรุ่น (Create Model Page)</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Charm:wght@400;700&family=Mali:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;1,200;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+    
+        <style>
+            body { 
+                font-family: 'Mali', sans-serif; 
+                padding: 0;
+                margin: 0;
+                text-align: center; 
+                color: rgb(164, 24, 164);
+                background-image: url('shop.jpg');  
+                background-size: cover;  
+                background-position: center;  
+                background-attachment: fixed;  
+            }
+            header {
+                background-color: rgba(0, 0, 0, 0.85);
+                color: #fff;
+                padding: 10px 20px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                border-bottom: 3px solid #FFD700;
+            }
+    
+            .container { 
+                max-width: 700px; 
+                margin: auto; 
+                background: rgba(255, 255, 255, 0.8);  
+                padding: 30px;
+                border-radius: 20px;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            }
+    
+            .title {
+                font-family: 'Charm', serif;
+                font-size: 35px;
+                font-weight: bold;
+                margin-bottom: 10px;
+            }
+    
+            .input-field, .select-field {
+                width: 85%;
+                padding: 10px;
+                font-size: 16px;
+                border-radius: 5px;
+                border: 1px solid #ccc;
+                margin: 10px 0;
+                text-align: center;
+            }
+    
+            .selection-container {
+                display: flex;
+                justify-content: space-around;
+                margin-bottom: 20px;
+                flex-wrap: wrap;
+            }
+            header {
+                background-color: rgba(0, 0, 0, 0.85);
+                color: #fff;
+                padding: 10px 20px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                border-bottom: 3px solid #FFD700;
+            }
+            .logo {
+                height: 40px;
+            }
+            nav {
+                flex: 1;
+                display: flex;
+                justify-content: center;
+            }
+            nav ul {
+                list-style-type: none;
+                margin: 0;
+                padding: 0;
+                display: flex;
+            }
+            nav ul li {
+                margin: 0 15px;
+            }
+            nav ul li a {
+                color: #fff;
+                text-decoration: none;
+                font-weight: bold;
+                transition: color 0.3s;
+            }
+            nav ul li a:hover {
+                color: #FFD700;
+            }
+    
+            .column {
+                flex: 1;
+                padding: 15px;
+                background: rgba(255, 255, 255, 0.9);
+                border-radius: 15px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                margin: 5px;
+            }
+    
+            .button { 
+                background: rgb(78, 78, 253); 
+                color: white; 
+                padding: 12px 25px; 
+                border: none; 
+                border-radius: 25px; 
+                cursor: pointer; 
+                font-size: 16px;
+                transition: background 0.3s ease-in-out;
+                margin-top: 20px;
+            }
+    
+            .button:hover {
+                background: #0000ef;
+            }
+    
+            .btn-container {
+                margin-top: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <a href="3.html"> <!-- เพิ่มลิงก์ไปยังหน้าแรก -->
+                <img src="pic.jpg" alt="โลโก้" class="logo">
+            </a>
+            <nav>
+                <ul>
+                    <li><a href="3.html">หน้าแรก</a></li>
+                    <li><a href="2.1.html">จับคู่อาหาร</a></li>
+                    <li><a href="4.html">ประวัติการแสดง</a></li>
+                </ul>
+            </nav>
+        </header>
+    <div class="container">
+        <h2>เลือกจับคู่อาหาร</h2>
+        <div id="selectionWrapper" class="selection-container">
+            <!-- ช่องเลือกหมวดหมู่จะถูกเพิ่มที่นี่ -->
+        </div>
+        <div class="btn-container">
+            <button class="button" onclick="addSelection()">เพิ่มช่องเลือก</button>
+            <button class="button" onclick="removeSelection()">ลบช่องเลือก</button>
+        </div>
+        
+        <h1 class="title">สร้างรุ่น</h1>
+
+        <p>กรอกจำนวนรุ่นสูงสุด:</p>
+        <input type="text" id="populationMax" class="input-field" placeholder="ใส่จำนวนรุ่น">
+        
+        <p>กรอกขนาดประชากร:</p>
+        <input type="text" id="populationSize" class="input-field" placeholder="ใส่ขนาดประชากร">
+        
+        <p>เลือกฟังก์ชันเหมาะสม:</p>
+        <select id="dropboxFunction" class="select-field">
+            <option value="">เลือกฟังก์ชัน</option>
+            <option value="RouletteWheel">Roulette Wheel</option>
+            <option value="Tournament">Tournament</option>
+            <option value="LinearRanking">Linear Ranking</option>
+        </select>
+        <br>
+        <button class="button" onclick="startProcessing()">สร้างรุ่น</button>
+    </div>
+    <script>
+        const selectionWrapper = document.getElementById('selectionWrapper');
+
+        // ฟังก์ชันเพื่อเพิ่มช่องเลือก
+        function addSelection() {
+            const newSelection = document.createElement('div');
+            newSelection.classList.add('column');
+        
+            const categorySelect = document.createElement('select');
+            categorySelect.classList.add('select-field');
+        
+            categorySelect.innerHTML = `
+                <option value="">เลือกหมวดหมู่</option>
+                <option value="เครื่องดื่ม">เครื่องดื่ม</option>
+                <option value="ขนมขบเคี้ยว">ขนมขบเคี้ยว</option>
+                <option value="ผัก-ผลไม้">ผัก-ผลไม้</option>
+                <option value="อาหาร">อาหาร</option>
+            `;
+        
+            // Event listener ให้ทำงานเมื่อมีการเปลี่ยนค่า
+            categorySelect.addEventListener('change', () => {
+                updateSelections();
+            });
+        
+            newSelection.appendChild(categorySelect);
+            document.getElementById('selectionWrapper').appendChild(newSelection);
+        }
+        
+        function updateSelections() {
+            const selectedCategories = [];
+            document.querySelectorAll('.select-field').forEach(select => {
+                if (select.value) {
+                    selectedCategories.push(select.value);
+                }
+            });
+        
+            localStorage.setItem('selections', JSON.stringify(selectedCategories));
+            console.log("บันทึกหมวดหมู่ที่เลือก:", selectedCategories);
+        }
+        
+         // ดักจับการเปลี่ยนแปลงค่าที่เลือก
+         document.getElementById('dropboxFunction').addEventListener('change', function() {
+            const selectedFunction = this.value;
+            localStorage.setItem('functionType', selectedFunction);
+            console.log("บันทึกฟังก์ชันที่เลือก:", selectedFunction);
+        });
+        
+
+        // ฟังก์ชันอัปเดตค่าหมวดหมู่ที่เลือกใน localStorage
+        function updateSelections() {
+            const selectedCategories = [];
+            document.querySelectorAll('.select-field').forEach(select => {
+                if (select.value) {
+                    selectedCategories.push(select.value);
+                }
+            });
+        
+            localStorage.setItem('selections', JSON.stringify(selectedCategories));
+            console.log("หมวดหมู่ที่บันทึก:", selectedCategories);
+        }
+        
+        // ฟังก์ชันเพื่อลบช่องเลือก
+        function removeSelection() {
+            if (selectionWrapper.children.length > 0) {
+                selectionWrapper.removeChild(selectionWrapper.lastElementChild);
+            }
+        }
+
+        // ฟังก์ชันสร้างรุ่น
+        function startProcessing() {
+            const populationMax = document.getElementById('populationMax').value.trim();
+            const populationSize = document.getElementById('populationSize').value.trim();
+            const functionType = document.getElementById('dropboxFunction').value;
+            
+        
+            // ตรวจสอบว่ากรอกค่าจำนวนรุ่น, ขนาดประชากร และฟังก์ชันที่เลือกหรือยัง
+            if (!populationMax || !populationSize || !functionType) {
+                alert("กรุณากรอกข้อมูลให้ครบถ้วน (จำนวนรุ่น, ขนาดประชากร และฟังก์ชันที่เลือก)");
+                return;
+            }
+        
+            // ดึงค่าหมวดหมู่ที่เลือก (ไม่นับ dropboxFunction)
+            const selections = [];
+            const categorySelects = document.querySelectorAll('.select-field');
+        
+            categorySelects.forEach(select => {
+                // เช็คว่าหมวดหมู่ไม่ใช่ `dropboxFunction`
+                if (select.id !== "dropboxFunction" && select.value) {
+                    selections.push(select.value);
+                }
+            });
+            
+        
+            // ถ้าไม่ได้เลือกหมวดหมู่เลย
+            if (selections.length === 0) {  
+                alert("กรุณาเลือกหมวดหมู่อย่างน้อย 1 หมวดหมู่ก่อนดำเนินการ!");
+                return;
+            }
+        
+            // บันทึกข้อมูลลงใน LocalStorage
+            localStorage.setItem('populationMax', populationMax);
+            localStorage.setItem('populationSize', populationSize);
+            localStorage.setItem('functionType', functionType);
+            localStorage.setItem('selections', JSON.stringify(selections));
+        
+            // แปลงค่าหมวดหมู่ให้เป็น string สำหรับ URL
+            
+            const history = JSON.parse(localStorage.getItem('history')) || [];
+            history.push({ populationMax, populationSize, functionType, selections });
+            localStorage.setItem('history', JSON.stringify(history));
+        
+        
+            // เปลี่ยนไปหน้าผลลัพธ์
+            const selectionsString = encodeURIComponent(selections.join(','));
+            window.location.href = `results.html?populationMax=${populationMax}&populationSize=${populationSize}&functionType=${functionType}&selections=${selectionsString}`;
+        }
+        
+    </script>
+</body>
+</html>

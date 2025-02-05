@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+    <title>ผลลัพธ์จาก Genetic Algorithm</title>
+    <style>
+        body { 
+            font-family: 'Mali', sans-serif; 
+            padding: 0;
+            margin: 0;
+            text-align: center; 
+            color: rgb(164, 24, 164);
+            background-image: url('shop.jpg');  
+            background-size: cover;  
+            background-position: center;  
+            background-attachment: fixed;  
+        }
+
+        .container { 
+            max-width: 700px; 
+            margin: auto; 
+            background: rgba(255, 255, 255, 0.9);  
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .title {
+            font-family: 'Charm', serif;
+            font-size: 35px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .result-box {
+            text-align: left;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        .input-box {
+            margin-top: 15px;
+            text-align: left;
+        }
+
+        .input-box label {
+            font-weight: bold;
+        }
+
+        .input-box input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .button { 
+            background: rgb(78, 78, 253); 
+            color: white; 
+            padding: 12px 25px; 
+            border: none; 
+            border-radius: 25px; 
+            cursor: pointer; 
+            font-size: 16px;
+            transition: background 0.3s ease-in-out;
+            margin-top: 20px;
+        }
+
+        .button:hover {
+            background: #0000ef;
+        }
+
+        /* Add styles for centering the button */
+        .button-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        /* Additional styles */
+        h1 {
+            color: #4CAF50;
+        }
+
+        .ga-result {
+            background-color: #f9f9f9;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ผลลัพธ์จาก Genetic Algorithm</h1>
+        <div class="result-box">
+            <p><strong>จำนวนรุ่นสูงสุด:</strong> <span id="populationMax"></span></p>
+            <p><strong>ขนาดประชากร:</strong> <span id="populationSize"></span></p>
+            <p><strong>ฟังก์ชันที่เลือก:</strong> <span id="functionType"></span></p>
+            <p><strong>หมวดหมู่ที่เลือก:</strong> <span id="selectedCategories"></span></p>
+            <p><strong>ค่า Target Fitness:</strong> <span id="targetFitness"></span></p>
+            <p><strong>ค่า Mutation Rate (%):</strong> <span id="mutationRate"></span></p>
+            
+            <!-- Center the button -->
+            <div class="button-container">
+                <button onclick="window.location.href='3.html'" class="button">หน้าแรก</button>
+            </div>
+
+            <div id="gaResult" class="ga-result"></div>
+        </div>
+    </div>
+
+    <script type="module" >
+        
+        import { LoadItem, geneticAlgorithm, selectionState, itemEnum } from './GeneticAlgorithm.js';
+        import { display } from './output.js';
+
+        document.addEventListener("DOMContentLoaded", () => {
+            // โหลดค่าจาก LocalStorage
+            const populationMax = localStorage.getItem('populationMax') || "ไม่ได้กำหนด";
+            const populationSize = localStorage.getItem('populationSize') || "ไม่ได้กำหนด";
+            const functionType = localStorage.getItem('functionType') || "ไม่ได้กำหนด";
+            const selections = JSON.parse(localStorage.getItem('selections')) || [];
+
+            // แสดงข้อมูลที่โหลดมา
+            document.getElementById('populationMax').innerText = populationMax;
+            document.getElementById('populationSize').innerText = populationSize;
+            document.getElementById('functionType').innerText = functionType;
+            document.getElementById('selectedCategories').innerText = selections.length > 0 ? selections.join(', ') : "ไม่มีหมวดหมู่ที่เลือก";
+
+            // กำหนดค่า Target Fitness, Mutation Rate, Max Generation
+            const targetFitness = localStorage.getItem('targetFitness') || "ไม่ได้กำหนด";
+            const mutationRate = localStorage.getItem('mutationRate') || "ไม่ได้กำหนด";
+
+            document.getElementById('targetFitness').innerText = targetFitness;
+            document.getElementById('mutationRate').innerText = mutationRate;
+
+            // ดึงรายการอาหารที่เลือก
+            const listItem = LoadItem();
+            const userItemTyep = selections.map(type => {
+                switch (type) {
+                    case "เครื่องดื่ม": return itemEnum.Drinks;
+                    case "ขนมขบเคี้ยว": return itemEnum.Snacks;
+                    case "ผัก-ผลไม้": return itemEnum.Fruits;
+                    case "อาหาร": return itemEnum.Food;
+                    default: return null;
+                }
+            }).filter(item => item !== null);
+
+            // เลือกฟังก์ชันการเลือก
+            let selectionStateValue;
+            switch (functionType) {
+                case "RouletteWheel":
+                    selectionStateValue = selectionState.RouletteWheel;
+                    break;
+                case "Tournament":
+                    selectionStateValue = selectionState.Tournament;
+                    break;
+                case "LinearRanking":
+                    selectionStateValue = selectionState.LinearRanking;
+                    break;
+                default:
+                    selectionStateValue = selectionState.RouletteWheel;
+            }
+
+            // เรียกใช้ Genetic Algorithm
+            const output = geneticAlgorithm(
+                userItemTyep,
+                targetFitness,          // จำนวนรุ่น
+                mutationRate,                  // ค่า Mutation Rate
+                listItem,                      // รายการสินค้า
+                parseInt(populationSize),      // ขนาดประชากร
+                selectionStateValue,           // ฟังก์ชันการเลือก
+                parseInt(populationMax)                  // รุ่นสูงสุด
+            );
+            
+            // แสดงผลลัพธ์
+            //Chart
+            document.getElementById('gaResult').innerHTML  += `<canvas id="myChart" style="width:100%;max-width:700px"></canvas>`;
+            var xyValues = [];
+            output.log.forEach((element, index) => {
+                console.log("x = " + (index+1) + "\ny = " + element.finalPopulation.rankedPopulation[0].fitness);
+                xyValues.push({x: (index+1), y: element.finalPopulation.rankedPopulation[0].fitness});
+            });
+            console.log(xyValues)
+            new Chart("myChart", {
+            type: "line",
+            data: {
+                datasets: [{
+                label: "Data Points", // Add a label (optional)
+                pointRadius: 4,       // Adjust point size
+                pointBackgroundColor: "rgba(0,0,255,1)", // Point color
+                pointBorderColor: "rgba(0,0,255,1)", // Point border color (optional)
+                pointBorderWidth: 1,    // Point border width (optional)
+                showLine: true,        // Ensure the line is shown
+                borderColor: "rgba(0,0,255,0.4)", // Line color
+                fill: false,            // Don't fill area under line
+                data: xyValues
+                }]
+            }});
+            
+            //time
+            document.getElementById('gaResult').innerHTML  += `<p><strong>เวลาที่ใช้ไป :</strong> ${output.time} ms</p>`;
+
+            var manu = ""
+            var recommendManu = output.chromosome.forEach(element => {
+                console.log(element.name)
+                manu += element.name + " ";
+            });
+            document.getElementById('gaResult').innerHTML  += `<p><strong>แนะนำ :</strong> ${manu} ราคารวม ${output.fitness} บาท</p>`;
+
+            
+
+            display(output);
+        });
+    </script>
+</body>
+</html>
