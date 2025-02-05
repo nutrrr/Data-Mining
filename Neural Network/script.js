@@ -106,6 +106,27 @@ class Node {
             select.value = this.fun ;
             inputGroup.appendChild(select);
             miniWindow.appendChild(inputGroup);
+
+            // Weight input rows (one for each connection)
+            this.connections.forEach((conn, index) => {
+                const weightGroup = document.createElement('div');
+                weightGroup.className = 'input-group';
+    
+                const weightLabel = document.createElement('label');
+                weightLabel.textContent = `Weight to ${conn.id}:`;
+                weightGroup.appendChild(weightLabel);
+    
+                const weightInput = document.createElement('input');
+                weightInput.type = 'number';
+                weightInput.id = `circle${this.id}-weight${conn.id}`;
+                weightInput.value = this.weights[index] || 0;
+                weightInput.addEventListener('input', (e) => {
+                    this.weights[index] = parseFloat(e.target.value) || 0; // Store weight in array
+                });
+    
+                weightGroup.appendChild(weightInput);
+                miniWindow.appendChild(weightGroup);
+            });
         } else if (this.type === 'output') {
             const inputGroup = document.createElement('div');
             inputGroup.className = 'input-group';
@@ -157,6 +178,7 @@ class Node {
             }else if (this.type === 'hidden') {
                 if(this.fun === 'sigmoid'){
                     node.value += this.sigmoid(this.value);
+                    node.value += this.weights[index];
                 }
                 else if(this.fun === 'threshold'){
                     node.value += this.threshold(this.value);
