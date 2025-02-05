@@ -152,7 +152,7 @@ class Node {
     addValue(){
         this.connections.forEach((node, index) =>{
             if (this.type === 'input') {
-                node.value = node.value ? a : 0;
+                node.value = node.value ? node.value : 0;
                 node.value += this.value + this.weights[index];
             }else if (this.type === 'hidden') {
                 if(this.fun === 'sigmoid'){

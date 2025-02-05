@@ -5,6 +5,11 @@ const itemData = [
       "price": 15
     },
     {
+        "type": "เครื่องดื่ม",
+        "name": "เป๊ปซี่",
+        "price": 15
+    },
+    {
       "type": "เครื่องดื่ม",
       "name": "น้ำส้ม",
       "price": 20
@@ -13,6 +18,16 @@ const itemData = [
       "type": "เครื่องดื่ม",
       "name": "ชาเขียว",
       "price": 18
+    },
+    {
+      "type": "เครื่องดื่ม",
+      "name": "น้ำ",
+      "price": 10
+    },
+    {
+        "type": "เครื่องดื่ม",
+        "name": "น้ำขวดเล็ก",
+        "price": 5
     },
     {
       "type": "ขนมขบเคี้ยว",
@@ -30,20 +45,20 @@ const itemData = [
       "price": 25
     },
     {
-      "type": "ผัก-ผลไม้",
-      "name": "แอปเปิล",
-      "price": 12
-    },
-    {
-      "type": "ผัก-ผลไม้",
-      "name": "กล้วย",
-      "price": 10
-    },
-    {
-      "type": "ผัก-ผลไม้",
-      "name": "มะเขือเทศ",
-      "price": 25
-    },
+        "type": "ขนมขบเคี้ยว",
+        "name": "มันฝรั่งทอดกรอบ",
+        "price": 20
+      },
+      {
+        "type": "ขนมขบเคี้ยว",
+        "name": "เค้กมินิ",
+        "price": 30
+      },
+      {
+        "type": "ขนมขบเคี้ยว",
+        "name": "ถั่วปากอ้า",
+        "price": 20
+      },
     {
       "type": "อาหาร",
       "name": "ข้าวสวย",
@@ -58,7 +73,22 @@ const itemData = [
       "type": "อาหาร",
       "name": "ไก่ทอด",
       "price": 50
-    }
+    },
+    {
+        "type": "อาหาร",
+        "name": "ข้าวเจ้า",
+        "price": 30
+      },
+      {
+        "type": "อาหาร",
+        "name": "ไข่ไก่กระทา",
+        "price": 28
+      },
+      {
+        "type": "อาหาร",
+        "name": "ไก่ย่าง",
+        "price": 80
+      }
   ]
 //Use to find the key use values ​for listItem
 export function getByValue(map, searchValue) {
