@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wine Quality Prediction</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tensorflow/4.7.0/tf.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            color: #555;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #predictionResult {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Wine Quality Prediction</h1>
+        
+        <div class="form-group">
+            <label for="citric_acid">Citric Acid:</label>
+            <input type="number" id="citric_acid" step="0.01">
+        </div>
+
+        <div class="form-group">
+            <label for="residual_sugar">Residual Sugar:</label>
+            <input type="number" id="residual_sugar" step="0.01">
+        </div>
+
+        <div class="form-group">
+            <label for="chlorides">Chlorides:</label>
+            <input type="number" id="chlorides" step="0.001">
+        </div>
+
+        <div class="form-group">
+            <label for="free_sulfur_dioxide">Free Sulfur Dioxide:</label>
+            <input type="number" id="free_sulfur_dioxide" step="1">
+        </div>
+
+        <div class="form-group">
+            <label for="sulphates">Sulphates:</label>
+            <input type="number" id="sulphates" step="0.01">
+        </div>
+
+        <div class="form-group">
+            <label for="alcohol">Alcohol:</label>
+            <input type="number" id="alcohol" step="0.1">
+        </div>
+
+        <button onclick="predictWineQuality()">Predict Wine Quality</button>
+        <div id="predictionResult">Prediction will appear here.</div>
+    </div>
+
+    <script>
+        let model;
+
+        async function loadModel() {
+            try {
+                model = await tf.loadLayersModel('model.json');
+                console.log('Model loaded successfully');
+            } catch (error) {
+                console.error('Error loading model:', error);
+            }
+        }
+
+        async function predictWineQuality() {
+            if (!model) {
+                alert("Model is not loaded yet. Please wait.");
+                return;
+            }
+
+            const inputValues = [
+                parseFloat(document.getElementById('citric_acid').value),
+                parseFloat(document.getElementById('residual_sugar').value),
+                parseFloat(document.getElementById('chlorides').value),
+                parseFloat(document.getElementById('free_sulfur_dioxide').value),
+                parseFloat(document.getElementById('sulphates').value),
+                parseFloat(document.getElementById('alcohol').value)
+            ];
+
+            if (inputValues.some(isNaN)) {
+                alert("Please enter all values correctly.");
+                return;
+            }
+
+            const inputTensor = tf.tensor2d([inputValues]);
+            const prediction = model.predict(inputTensor);
+            const result = (await prediction.data())[0];
+            document.getElementById('predictionResult').textContent = result >= 0.5 ? "Quality: Good" : "Quality: Poor";
+        }
+
+        loadModel();
+    </script>
+</body>
+</html>

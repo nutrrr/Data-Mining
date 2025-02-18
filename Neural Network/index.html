@@ -3,41 +3,297 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neural Network Visualization</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Wine Quality Model Training</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tensorflow/4.7.0/tf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        input[type="number"], input[type="file"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .progress {
+            width: 0%;
+            height: 100%;
+            background-color: #4CAF50;
+            transition: width 0.3s ease-in-out;
+        }
+
+        #log {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+        }
+
+        .metrics {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .metric-card {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            text-align: center;
+            flex: 1;
+            margin: 0 5px;
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <svg id="lines"></svg>
-        <div class="column" id="column1">
-            <div class="layer-label">Input Layer</div>
+        <h1>Wine Quality Model Training</h1>
+        
+        <div class="form-group">
+            <label for="csvFile">Upload Wine Dataset (CSV):</label>
+            <input type="file" id="csvFile" accept=".csv">
         </div>
-        <div class="column" id="column2">
-            <div class="layer-label">Hidden Layer</div>
-        </div>
-        <div class="column" id="column3">
-            <div class="layer-label">Output Layer</div>
-        </div>
-    </div>
-    <div class="buttons">
-        <div>
-            <button class="btn" onclick="addCircle(1)">Add Input Node</button>
-            <button class="btn remove" onclick="removeCircle(1)">Remove Input Node</button>
-        </div>
-        <div>
-            <button class="btn" onclick="addCircle(2)">Add Hidden Node</button>
-            <button class="btn remove" onclick="removeCircle(2)">Remove Hidden Node</button>
-        </div>
-        <div>
-            <button class="btn" onclick="addCircle(3)">Add Output Node</button>
-            <button class="btn remove" onclick="removeCircle(3)">Remove Output Node</button>
-        </div>
-    </div>
-    <div class="buttons">
-        <button class="btn run" onclick="runNN()">Run</button>
-    </div>
-    <script src="script.js"></script>
-    <script src="NN.js"></script>
 
+        <div class="form-group">
+            <label for="epochs">Number of Epochs:</label>
+            <input type="number" id="epochs" value="50" min="1" max="1000">
+        </div>
+
+        <div class="form-group">
+            <label for="batchSize">Batch Size:</label>
+            <input type="number" id="batchSize" value="8" min="1" max="128">
+        </div>
+
+        <button id="trainButton" onclick="trainModel()" disabled>Upload CSV to Start Training</button>
+
+        <div class="metrics">
+            <div class="metric-card">
+                <div>Accuracy</div>
+                <div id="accuracyMetric" class="metric-value">-</div>
+            </div>
+            <div class="metric-card">
+                <div>Loss</div>
+                <div id="lossMetric" class="metric-value">-</div>
+            </div>
+        </div>
+
+        <div class="progress-bar">
+            <div id="progress" class="progress"></div>
+        </div>
+
+        <div id="log"></div>
+    </div>
+
+    <script>
+        let isTraining = false;
+        let processedData = null;
+        const inputFeatures = [
+            'citric_acid', 'residual_sugar',
+            'chlorides', 'free_sulfur_dioxide',
+            'sulphates', 'alcohol'
+        ];
+
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            logDiv.innerHTML += `<div>${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function updateProgress(current, total) {
+            const progress = document.getElementById('progress');
+            const percentage = (current / total) * 100;
+            progress.style.width = `${percentage}%`;
+        }
+
+        function updateMetrics(accuracy, loss) {
+            document.getElementById('accuracyMetric').textContent = 
+                accuracy ? (accuracy * 100).toFixed(1) + '%' : '-';
+            document.getElementById('lossMetric').textContent = 
+                loss ? loss.toFixed(4) : '-';
+        }
+
+        document.getElementById('csvFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                Papa.parse(file, {
+                    header: true,
+                    complete: function(results) {
+                        processedData = results.data
+                            .filter(row => inputFeatures.every(feature => !isNaN(row[feature])))
+                            .map(row => ({
+                                inputs: inputFeatures.map(feature => parseFloat(row[feature])),
+                                target: parseInt(row.quality) >= 6 ? 1 : 0
+                            }));
+                        
+                        log(`Loaded ${processedData.length} valid records from CSV`);
+                        document.getElementById('trainButton').disabled = false;
+                        document.getElementById('trainButton').textContent = 'Train Model';
+                    },
+                    error: function(error) {
+                        log(`Error loading CSV: ${error.message}`);
+                    }
+                });
+            }
+        });
+
+        async function trainModel() {
+            if (isTraining || !processedData) return;
+            isTraining = true;
+
+            const trainButton = document.getElementById('trainButton');
+            const epochs = parseInt(document.getElementById('epochs').value);
+            const batchSize = parseInt(document.getElementById('batchSize').value);
+
+            trainButton.disabled = true;
+            document.getElementById('log').innerHTML = '';
+            updateProgress(0, epochs);
+            
+            try {
+                // Convert to tensors
+                const xs = tf.tensor2d(processedData.map(d => d.inputs));
+                const ys = tf.tensor2d(processedData.map(d => [d.target]));
+
+                // Define model
+                const model = tf.sequential();
+                model.add(tf.layers.dense({ 
+                    inputShape: [inputFeatures.length], 
+                    units: 5, 
+                    activation: 'relu' 
+                }));
+                model.add(tf.layers.dense({ 
+                    units: 1, 
+                    activation: 'sigmoid' 
+                }));
+
+                model.compile({ 
+                    optimizer: 'adam', 
+                    loss: 'binaryCrossentropy', 
+                    metrics: ['accuracy'] 
+                });
+
+                log('Starting training...');
+
+                await model.fit(xs, ys, {
+                    epochs: epochs,
+                    batchSize: batchSize,
+                    validationSplit: 0.2,
+                    callbacks: {
+                        onEpochEnd: (epoch, logs) => {
+                            updateProgress(epoch + 1, epochs);
+                            updateMetrics(logs.acc, logs.loss);
+                            log(`Epoch ${epoch + 1}/${epochs} - loss: ${logs.loss.toFixed(4)} - accuracy: ${logs.acc.toFixed(4)}`);
+                        }
+                    }
+                });
+
+                log('Training completed!');
+                
+                // Make predictions on a few samples
+                const testSamples = processedData.slice(0, 5);
+                const testData = tf.tensor2d(testSamples.map(d => d.inputs));
+                const predictions = model.predict(testData);
+                
+                log('\nSample Predictions:');
+                predictions.dataSync().forEach((pred, idx) => {
+                    const actual = testSamples[idx].target;
+                    log(`Sample ${idx + 1}: Predicted: ${pred >= 0.5 ? 'Good' : 'Poor'} (${pred.toFixed(4)}), Actual: ${actual === 1 ? 'Good' : 'Poor'}`);
+                });
+
+                // Calculate overall accuracy
+                const allPredictions = model.predict(xs);
+                const predictedClasses = allPredictions.dataSync().map(p => p >= 0.5 ? 1 : 0);
+                const actualClasses = processedData.map(d => d.target);
+                const accuracy = predictedClasses.reduce((acc, pred, i) => acc + (pred === actualClasses[i] ? 1 : 0), 0) / actualClasses.length;
+                
+                log(`\nOverall Accuracy: ${(accuracy * 100).toFixed(2)}%`);
+
+            } catch (error) {
+                log(`Error: ${error.message}`);
+            } finally {
+                trainButton.disabled = false;
+                isTraining = false;
+            }
+        }
+    </script>
 </body>
 </html>
