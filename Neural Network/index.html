@@ -145,6 +145,7 @@
         </div>
 
         <button id="trainButton" onclick="trainModel()" disabled>Upload CSV to Start Training</button>
+        <button id="nextPageButton" onclick="nextPage()">Next Page</button>
 
         <div class="metrics">
             <div class="metric-card">
@@ -165,6 +166,7 @@
     </div>
 
     <script>
+        let model;
         let isTraining = false;
         let processedData = null;
         const inputFeatures = [
@@ -234,7 +236,7 @@
                 const ys = tf.tensor2d(processedData.map(d => [d.target]));
 
                 // Define model
-                const model = tf.sequential();
+                model = tf.sequential();
                 model.add(tf.layers.dense({ 
                     inputShape: [inputFeatures.length], 
                     units: 5, 
@@ -293,6 +295,17 @@
                 trainButton.disabled = false;
                 isTraining = false;
             }
+        }
+
+        function saveModel() {
+            if (model) {
+                model.save('localstorage://my-model');            
+            }
+        }
+
+        function nextPage() {
+            saveModel();
+            window.location.href = "page2.html";
         }
     </script>
 </body>
