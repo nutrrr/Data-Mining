@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wine Quality Predictor</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tensorflow/4.2.0/tf.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .result {
+            margin-top: 2rem;
+            padding: 1rem;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .nav {
+            margin-bottom: 2rem;
+        }
+
+        .nav a {
+            color: #007bff;
+            text-decoration: none;
+            margin-right: 1rem;
+        }
+
+        .nav a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="#" onclick="showPage('predict')">Prediction Page</a>
+        <a href="#" onclick="showPage('train')">Training Page</a>
+    </div>
+
+    <div id="predict-page" class="container">
+        <h1>Wine Quality Predictor</h1>
+        <form id="prediction-form">
+            <div class="form-group">
+                <label for="citric_acid">Citric Acid:</label>
+                <input type="number" id="citric_acid" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="residual_sugar">Residual Sugar:</label>
+                <input type="number" id="residual_sugar" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="chlorides">Chlorides:</label>
+                <input type="number" id="chlorides" step="0.001" required>
+            </div>
+            <div class="form-group">
+                <label for="free_sulfur_dioxide">Free Sulfur Dioxide:</label>
+                <input type="number" id="free_sulfur_dioxide" step="0.1" required>
+            </div>
+            <div class="form-group">
+                <label for="sulphates">Sulphates:</label>
+                <input type="number" id="sulphates" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="alcohol">Alcohol:</label>
+                <input type="number" id="alcohol" step="0.1" required>
+            </div>
+            <button type="submit">Predict Quality</button>
+        </form>
+        <div id="prediction-result" class="result"></div>
+    </div>
+
+    <div id="train-page" class="container" style="display: none;">
+        <h1>Model Training</h1>
+        <form id="training-form">
+            <div class="form-group">
+                <label for="epochs">Number of Epochs:</label>
+                <input type="number" id="epochs" min="1" value="50" required>
+            </div>
+            <div class="form-group">
+                <label for="batch-size">Batch Size:</label>
+                <input type="number" id="batch-size" min="1" value="8" required>
+            </div>
+            <button type="submit">Train Model</button>
+        </form>
+        <div id="training-result" class="result"></div>
+    </div>
+
+    <script>
+        function showPage(page) {
+            document.getElementById('predict-page').style.display = page === 'predict' ? 'block' : 'none';
+            document.getElementById('train-page').style.display = page === 'train' ? 'block' : 'none';
+        }
+
+        document.getElementById('prediction-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const inputs = [
+                'citric_acid', 'residual_sugar', 'chlorides', 
+                'free_sulfur_dioxide', 'sulphates', 'alcohol'
+            ].map(id => parseFloat(document.getElementById(id).value));
+
+            try {
+                const inputTensor = tf.tensor2d([inputs]);
+                const prediction = model.predict(inputTensor).dataSync()[0];
+                const quality = prediction >= 0.5 ? 'Good' : 'Poor';
+                const resultDiv = document.getElementById('prediction-result');
+                resultDiv.textContent = `Predicted Wine Quality: ${quality} (${(prediction * 100).toFixed(2)}% confidence)`;
+                resultDiv.className = 'result success';
+                resultDiv.style.display = 'block';
+            } catch (error) {
+                const resultDiv = document.getElementById('prediction-result');
+                resultDiv.textContent = 'Error making prediction. Please ensure model is trained.';
+                resultDiv.className = 'result error';
+                resultDiv.style.display = 'block';
+            }
+        });
+
+        document.getElementById('training-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const epochs = parseInt(document.getElementById('epochs').value);
+            const batchSize = parseInt(document.getElementById('batch-size').value);
+
+            const resultDiv = document.getElementById('training-result');
+            resultDiv.textContent = 'Training in progress...';
+            resultDiv.className = 'result success';
+            resultDiv.style.display = 'block';
+
+            try {
+                await model.fit(xs, ys, { 
+                    epochs: epochs, 
+                    batchSize: batchSize,
+                    callbacks: {
+                        onEpochEnd: (epoch, logs) => {
+                            resultDiv.textContent = `Training... Epoch ${epoch + 1}/${epochs}, Loss: ${logs.loss.toFixed(4)}`;
+                        }
+                    }
+                });
+                resultDiv.textContent = 'Training completed successfully!';
+            } catch (error) {
+                resultDiv.textContent = 'Error during training: ' + error.message;
+                resultDiv.className = 'result error';
+            }
+        });
+    </script>
+</body>
+</html>
