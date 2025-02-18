@@ -1,0 +1,15 @@
+Input
+fixed_acidity           The amount of fixed acids in the wine, which is typically a combination of tartaric, malic, and citric acids.	float64
+volatile_acidity	    The amount of volatile acids in the wine, primarily acetic acid.	                                            float64
+citric_acid	The         amount of citric acid in the wine, contributing to the overall acidity.	                                        float64
+residual_sugar	        The amount of sugar remaining after fermentation.	                                                            float64
+chlorides	            The amount of chlorides in the wine, which can indicate the presence of salt.	                                float64
+free_sulfur_dioxide	    The amount of free sulfur dioxide in the wine, used as a preservative.	                                        float64
+total_sulfur_dioxide	The total amount of sulfur dioxide, including bound and free forms.	                                            float64
+density	                The density of the wine, related to alcohol and sugar content.	                                                float64
+pH	                    The pH level of the wine, indicating its acidity.	                                                            float64
+sulphates	            The amount of sulphates in the wine, contributing to its taste and preservation.	                            float64
+alcohol	                The alcohol content of the wine in percentage.	                                                                float64
+
+Output
+quality	                The quality of the wine, rated from 3 to 9, with higher values indicating better quality.	                    int64
