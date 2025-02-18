@@ -117,6 +117,7 @@
             </div>
 
             <div id="gaResult" class="ga-result"></div>
+            <canvas id="myChart" style="width:100%;max-width:700px"></canvas>
         </div>
     </div>
 
@@ -186,28 +187,43 @@
             
             // แสดงผลลัพธ์
             //Chart
-            document.getElementById('gaResult').innerHTML  += `<canvas id="myChart" style="width:100%;max-width:700px"></canvas>`;
-            var xyValues = [];
+            document.getElementById('gaResult').innerHTML  += ``;
+            let xyValues = [];
             output.log.forEach((element, index) => {
-                console.log("x = " + (index+1) + "\ny = " + element.finalPopulation.rankedPopulation[0].fitness);
-                xyValues.push({x: (index+1), y: element.finalPopulation.rankedPopulation[0].fitness});
+                xyValues.push({ x: index + 1, y: element.finalPopulation.rankedPopulation[0].fitness });
             });
-            console.log(xyValues)
-            new Chart("myChart", {
-            type: "line",
+
+            setTimeout(() => {
+            new Chart('myChart', {
+            type: 'line',
             data: {
+                // Pass in your array of {x, y} objects directly
                 datasets: [{
-                label: "Data Points", // Add a label (optional)
-                pointRadius: 4,       // Adjust point size
-                pointBackgroundColor: "rgba(0,0,255,1)", // Point color
-                pointBorderColor: "rgba(0,0,255,1)", // Point border color (optional)
-                pointBorderWidth: 1,    // Point border width (optional)
-                showLine: true,        // Ensure the line is shown
-                borderColor: "rgba(0,0,255,0.4)", // Line color
-                fill: false,            // Don't fill area under line
-                data: xyValues
+                label: "Data Points",
+                data: xyValues,
+                pointRadius: 4,
+                pointBackgroundColor: "rgba(0,0,255,1)",
+                pointBorderColor: "rgba(0,0,255,1)",
+                pointBorderWidth: 1,
+                showLine: true,
+                borderColor: "rgba(0,0,255,0.4)",
+                fill: false
                 }]
-            }});
+            },
+            options: {
+                scales: {
+                // Important: a line chart with {x,y} data needs a linear x-axis
+                xAxes: [{
+                    type: 'linear',
+                    position: 'bottom'
+                }],
+                yAxes: [{
+                    type: 'linear'
+                }]
+                }
+            }
+        });
+        }, 500);
             
             //time
             document.getElementById('gaResult').innerHTML  += `<p><strong>เวลาที่ใช้ไป :</strong> ${output.time} ms</p>`;

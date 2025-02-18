@@ -1,8 +1,8 @@
 class Node {
-    constructor(id, type, value = 0) {
+    constructor(id, type) {
         this.id = id;
         this.type = type;
-        this.value = value;
+        this.value = 0;
         this.fun = ''
         this.element = this.createNodeElement();
         this.connections = [];
@@ -106,6 +106,27 @@ class Node {
             select.value = this.fun ;
             inputGroup.appendChild(select);
             miniWindow.appendChild(inputGroup);
+
+            // Weight input rows (one for each connection)
+            this.connections.forEach((conn, index) => {
+                const weightGroup = document.createElement('div');
+                weightGroup.className = 'input-group';
+    
+                const weightLabel = document.createElement('label');
+                weightLabel.textContent = `Weight to ${conn.id}:`;
+                weightGroup.appendChild(weightLabel);
+    
+                const weightInput = document.createElement('input');
+                weightInput.type = 'number';
+                weightInput.id = `circle${this.id}-weight${conn.id}`;
+                weightInput.value = this.weights[index] || 0;
+                weightInput.addEventListener('input', (e) => {
+                    this.weights[index] = parseFloat(e.target.value) || 0; // Store weight in array
+                });
+    
+                weightGroup.appendChild(weightInput);
+                miniWindow.appendChild(weightGroup);
+            });
         } else if (this.type === 'output') {
             const inputGroup = document.createElement('div');
             inputGroup.className = 'input-group';
@@ -151,15 +172,18 @@ class Node {
 
     addValue(){
         this.connections.forEach((node, index) =>{
+            if (this.type === 'output') {return}
+            if(isNaN(node.value)){node.value = 0}
             if (this.type === 'input') {
-                node.value = node.value ? a : 0;
                 node.value += this.value + this.weights[index];
             }else if (this.type === 'hidden') {
                 if(this.fun === 'sigmoid'){
                     node.value += this.sigmoid(this.value);
+                    node.value += this.weights[index];
                 }
                 else if(this.fun === 'threshold'){
                     node.value += this.threshold(this.value);
+                    node.value += this.weights[index];
                 }        
             }
         })
@@ -217,16 +241,16 @@ function removeCircle(columnNum) {
         nodes.forEach(otherNode => {
             otherNode.removeConnection(node);
         });
-
-        // ลบโหนดออกจาก Map
-        nodes.delete(nodeId);
-
+        
         const miniWindow = miniWindows.get(column.lastChild);
         if (miniWindow) {
             miniWindow.remove();
             miniWindows.delete(column.lastChild);
         }
         column.removeChild(column.lastChild);
+
+        // ลบโหนดออกจาก Map
+        nodes.delete(nodeId);
         drawLines();
     }
 }
