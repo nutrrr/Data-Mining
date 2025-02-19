@@ -78,32 +78,32 @@
         
         <div class="form-group">
             <label for="citric_acid">Citric Acid:</label>
-            <input type="number" id="citric_acid" step="0.01">
+            <input type="number" id="citric_acid" step="0.01" value="0.46">
         </div>
 
         <div class="form-group">
             <label for="residual_sugar">Residual Sugar:</label>
-            <input type="number" id="residual_sugar" step="0.01">
+            <input type="number" id="residual_sugar" step="0.01" value="20.49">
         </div>
 
         <div class="form-group">
             <label for="chlorides">Chlorides:</label>
-            <input type="number" id="chlorides" step="0.001">
+            <input type="number" id="chlorides" step="0.001" value="0.15">
         </div>
 
         <div class="form-group">
             <label for="free_sulfur_dioxide">Free Sulfur Dioxide:</label>
-            <input type="number" id="free_sulfur_dioxide" step="1">
+            <input type="number" id="free_sulfur_dioxide" step="1" value="65.4">
         </div>
 
         <div class="form-group">
             <label for="sulphates">Sulphates:</label>
-            <input type="number" id="sulphates" step="0.01">
+            <input type="number" id="sulphates" step="0.01" value="0.51">
         </div>
 
         <div class="form-group">
             <label for="alcohol">Alcohol:</label>
-            <input type="number" id="alcohol" step="0.1">
+            <input type="number" id="alcohol" step="0.1" value="12.99">
         </div>
 
         <button onclick="predictWineQuality()">Predict Wine Quality</button>
@@ -115,7 +115,8 @@
 
         async function loadModel() {
             try {
-                model = await tf.loadLayersModel('model.json');
+                model = localStorage.getItem('Neural Network model');
+                model = await tf.loadLayersModel('localstorage://my-model');
                 console.log('Model loaded successfully');
             } catch (error) {
                 console.error('Error loading model:', error);
@@ -127,7 +128,7 @@
                 alert("Model is not loaded yet. Please wait.");
                 return;
             }
-
+            console.log(model)
             const inputValues = [
                 parseFloat(document.getElementById('citric_acid').value),
                 parseFloat(document.getElementById('residual_sugar').value),
@@ -146,6 +147,7 @@
             const prediction = model.predict(inputTensor);
             const result = (await prediction.data())[0];
             document.getElementById('predictionResult').textContent = result >= 0.5 ? "Quality: Good" : "Quality: Poor";
+            document.getElementById('predictionResult').textContent += "(" + result + ")"
         }
 
         loadModel();
